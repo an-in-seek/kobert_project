@@ -48,12 +48,7 @@ CASES: List[Tuple[str, str]] = [
 IDS = [f"{i:02d}_{'ad' if lab == '광고' else 'normal'}" for i, (_, lab) in enumerate(CASES)]
 
 # 스모크: 고정 선택
-SMOKE_IDX = [
-    # --- 광고 ---
-    0,  # "무료 증정" - 무료
-    # --- 정상 ---
-    16,  # "반가워요" - 최단/일상 인사
-]
+SMOKE_IDX = [0, 1]
 SMOKE_CASES = [CASES[i] for i in SMOKE_IDX]
 SMOKE_IDS = [IDS[i] for i in SMOKE_IDX]
 
@@ -81,9 +76,8 @@ def test_ad_batch_predictions(model_and_tokenizer, max_len, device, text, expect
 
 def test_ad_batch_predictions_all(model_and_tokenizer, max_len, device):
     """
-    모든 케이스를 한 번에 배치 예측으로 검증하고,
-    틀린 항목이 있으면 표로 상세 출력.
-    (여기서만 상세 실패 표를 출력해 중복 실패 로그를 방지)
+    모든 케이스를 배치 예측으로 검증하고
+    틀린 항목이 있으면 간단하고 직관적으로 출력.
     """
     model, tokenizer = model_and_tokenizer
     sentences = [t for t, _ in CASES]
@@ -99,19 +93,16 @@ def test_ad_batch_predictions_all(model_and_tokenizer, max_len, device):
         log_stats=False,
     )
 
-    mismatches = []
-    for i, (inp, exp, got) in enumerate(zip(sentences, expected, preds)):
-        if exp != got:
-            mismatches.append((i, inp, exp, got))
+    mismatches = [
+        (i, inp, exp, got)
+        for i, (inp, exp, got) in enumerate(zip(sentences, expected, preds))
+        if exp != got
+    ]
 
     if mismatches:
-        lines = [
-            "\n예측 불일치 목록:",
-            " idx | 입력 문장                           | 기대 | 예측",
-            "-----+--------------------------------------+------|------",
-        ]
+        lines = ["예측 불일치 목록:"]
         for idx, inp, exp, got in mismatches:
-            lines.append(f"{idx:>4} | {inp[:38]:<38} | {exp:<2} | {got:<2}")
+            lines.append(f"[{idx}] {inp}  (기대: {exp} → 예측: {got})")
         raise AssertionError("\n".join(lines))
 
     assert preds == expected
