@@ -2,8 +2,9 @@ torch >= 1.8.1
 transformers >= 4.8.2
 sentencepiece >= 0.1.91
 numpy>=1.17
-pandas
-tqdm
-scikit-learn
+pandas~=2.3.1
+tqdm~=4.67.1
+scikit-learn~=1.7.1
 openpyxl
 kobert_tokenizer @ git+https://github.com/SKTBrain/KoBERT.git#egg=kobert_tokenizer&subdirectory=kobert_hf
+pytest~=8.4.1

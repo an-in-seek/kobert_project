@@ -22,15 +22,6 @@ from src.utils import set_seed
 
 
 def main():
-    if DEVICE.type == "cuda":
-        try:
-            gpu_name = torch.cuda.get_device_name(0)
-        except Exception:
-            gpu_name = "Unknown CUDA Device"
-        print(f"[INFO] Using GPU: {gpu_name}")
-    else:
-        print("[INFO] Using CPU")
-
     parser = argparse.ArgumentParser(description="KoBERT Multi-Task Classification")
     parser.add_argument(
         "--task",

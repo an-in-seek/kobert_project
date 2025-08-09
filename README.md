@@ -161,13 +161,7 @@ RuntimeError: Deterministic behavior was enabled...
 1. 환경변수 설정 (결정론 유지)
 
 ```bash
-set CUBLAS_WORKSPACE_CONFIG=:4096:8
-```
-
-2. 또는 결정론 모드 해제:
-
-```python
-torch.use_deterministic_algorithms(False)
+$env:CUBLAS_WORKSPACE_CONFIG=":4096:8"
 ```
 
 ---
