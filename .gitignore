@@ -1,3 +1,4 @@
 /.idea
 /kobert_emotion.pt
 /kobert-base-v1-local/pytorch_model.bin
+/saved_model_ad.pt

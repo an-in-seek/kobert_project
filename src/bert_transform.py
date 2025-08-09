@@ -1,6 +1,7 @@
 # src/bert_transform.py
-
 import numpy as np
+
+from src.textproc import clean_text
 
 
 class BERTSentenceTransform:
@@ -16,14 +17,10 @@ class BERTSentenceTransform:
         self.pair = pair
 
     def __call__(self, line):
-        """
-        line: [text_a] 또는 [text_a, text_b]
-        """
         if self.pair and len(line) == 2:
-            text_a, text_b = line
+            text_a, text_b = clean_text(line[0]), clean_text(line[1])
             encoding = self.tokenizer.encode_plus(
-                text_a,
-                text_b,
+                text_a, text_b,
                 max_length=self.max_seq_length,
                 padding='max_length' if self.pad else None,
                 truncation=True,
@@ -31,7 +28,7 @@ class BERTSentenceTransform:
                 return_attention_mask=True
             )
         else:
-            text_a = line[0]
+            text_a = clean_text(line[0])
             encoding = self.tokenizer.encode_plus(
                 text_a,
                 max_length=self.max_seq_length,
@@ -40,7 +37,6 @@ class BERTSentenceTransform:
                 return_token_type_ids=True,
                 return_attention_mask=True
             )
-
         input_ids = np.array(encoding['input_ids'], dtype='int64')
         attention_mask = np.array(encoding['attention_mask'], dtype='int64')
         token_type_ids = np.array(encoding['token_type_ids'], dtype='int64')

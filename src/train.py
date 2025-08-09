@@ -1,10 +1,9 @@
 # src/train.py
-
-# src/train.py
 import torch
 from torch import nn
+from torch.optim import AdamW
 from tqdm import tqdm
-from transformers import AdamW, get_cosine_schedule_with_warmup
+from transformers import get_cosine_schedule_with_warmup
 
 from src.config import WARMUP_RATIO, MAX_GRAD_NORM, LOG_INTERVAL, DEVICE
 

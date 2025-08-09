@@ -14,6 +14,11 @@ def get_kobert_model_and_tokenizer():
     """
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     model_dir = os.path.join(base_dir, 'kobert-base-v1-local')
+    if not os.path.isdir(model_dir):
+        raise FileNotFoundError(
+            f"[ERROR] KoBERT local directory not found: {model_dir}\n"
+            f"다운로드 혹은 경로 설정을 확인하세요."
+        )
     tokenizer = KoBERTTokenizer.from_pretrained(model_dir)
     model = BertModel.from_pretrained(model_dir)
     return model, tokenizer
