@@ -1,15 +1,17 @@
 # src/train.py
+
+# src/train.py
 import torch
 from torch import nn
 from tqdm import tqdm
 from transformers import AdamW, get_cosine_schedule_with_warmup
 
-from src.config import WARMUP_RATIO, MAX_GRAD_NORM, NUM_EPOCHS, LOG_INTERVAL, DEVICE
+from src.config import WARMUP_RATIO, MAX_GRAD_NORM, LOG_INTERVAL, DEVICE
 
 
 def calc_accuracy(logits, labels):
-    max_indices = torch.argmax(logits, dim=1)
-    acc = (max_indices == labels).sum().item() / labels.size(0)
+    preds = torch.argmax(logits, dim=1)
+    acc = (preds == labels).sum().item() / labels.size(0)
     return acc
 
 
@@ -17,11 +19,14 @@ def train(
     model,
     train_loader,
     test_loader,
-    num_epochs=NUM_EPOCHS,
-    learning_rate=5e-5,
-    model_save_path="kobert_emotion.pt",
+    num_epochs,
+    learning_rate,
+    model_save_path,
     device=DEVICE,
 ):
+    """
+    모든 분류 작업에 재사용 가능한 학습/평가 함수
+    """
     no_decay = ['bias', 'LayerNorm.weight']
     optimizer_grouped_parameters = [
         {'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in no_decay)],
@@ -94,6 +99,9 @@ def train(
 
 
 def evaluate(model, test_loader, device=DEVICE):
+    """
+    모든 분류 작업에 재사용 가능한 평가 함수
+    """
     model.eval()
     test_loss = 0.0
     test_acc = 0.0

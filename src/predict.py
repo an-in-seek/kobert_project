@@ -3,8 +3,7 @@
 import torch
 from torch.utils.data import DataLoader
 
-from src.config import LABEL2EMOTION, BATCH_SIZE, DEVICE
-from src.dataset import BERTDataset
+from src.dataset import GenericBERTDataset
 
 
 def predict_sentence(
@@ -12,13 +11,14 @@ def predict_sentence(
     tokenizer,
     sentence,
     max_len,
-    device=DEVICE,
+    device,
+    label2str,
 ):
     """
-    한 문장에 대해 감정 예측 결과 반환
+    한 문장에 대해 예측 결과(레이블 문자열) 반환
     """
     data = [[sentence, 0]]  # label은 dummy
-    dataset = BERTDataset(data, 0, 1, tokenizer, max_len, pad=True, pair=False)
+    dataset = GenericBERTDataset(data, 0, 1, tokenizer, max_len, pad=True, pair=False)
     data_loader = DataLoader(dataset, batch_size=1, num_workers=0)
 
     model.eval()
@@ -30,8 +30,8 @@ def predict_sentence(
             outputs = model(input_ids, attention_mask, token_type_ids)
             logits = outputs.detach().cpu().numpy()[0]
             pred_label = int(logits.argmax())
-            emotion = LABEL2EMOTION.get(pred_label, "Unknown")
-    return emotion
+            pred_str = label2str.get(pred_label, "Unknown")
+    return pred_str
 
 
 def predict_batch(
@@ -39,14 +39,16 @@ def predict_batch(
     tokenizer,
     sentences,
     max_len,
-    device=DEVICE,
+    device,
+    label2str,
+    batch_size=32,
 ):
     """
-    여러 문장에 대해 감정 예측 결과 리스트 반환
+    여러 문장에 대해 예측 결과(레이블 문자열 리스트) 반환
     """
     data = [[s, 0] for s in sentences]
-    dataset = BERTDataset(data, 0, 1, tokenizer, max_len, pad=True, pair=False)
-    data_loader = DataLoader(dataset, batch_size=BATCH_SIZE, num_workers=0)
+    dataset = GenericBERTDataset(data, 0, 1, tokenizer, max_len, pad=True, pair=False)
+    data_loader = DataLoader(dataset, batch_size=batch_size, num_workers=0)
 
     model.eval()
     results = []
@@ -58,6 +60,6 @@ def predict_batch(
             outputs = model(input_ids, attention_mask, token_type_ids)
             logits = outputs.detach().cpu().numpy()
             preds = logits.argmax(axis=1)
-            emotions = [LABEL2EMOTION.get(int(p), "Unknown") for p in preds]
-            results.extend(emotions)
+            preds_str = [label2str.get(int(p), "Unknown") for p in preds]
+            results.extend(preds_str)
     return results

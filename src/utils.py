@@ -6,12 +6,10 @@ import random
 import numpy as np
 import torch
 
-from src.config import LABEL2EMOTION, EMOTION2LABEL
-
 
 def set_seed(seed: int = 42):
     """
-    실험 재현성을 위한 랜덤 시드 고정
+    실험 재현성을 위한 랜덤 시드 고정 (모든 분류 작업 공통)
     """
     random.seed(seed)
     np.random.seed(seed)
@@ -21,23 +19,23 @@ def set_seed(seed: int = 42):
     torch.backends.cudnn.benchmark = False
 
 
-def label_to_emotion(label: int) -> str:
+def label_to_str(label: int, label2str: dict) -> str:
     """
-    숫자 라벨을 감정 문자열로 변환
+    숫자 레이블을 문자열로 변환 (공통 라벨 매핑)
     """
-    return LABEL2EMOTION.get(label, "Unknown")
+    return label2str.get(label, "Unknown")
 
 
-def emotion_to_label(emotion: str) -> int:
+def str_to_label(s: str, str2label: dict) -> int:
     """
-    감정 문자열을 숫자 라벨로 변환
+    문자열을 숫자 레이블로 변환 (공통 라벨 매핑)
     """
-    return EMOTION2LABEL.get(emotion, -1)
+    return str2label.get(s, -1)
 
 
 def print_model_info(model):
     """
-    모델 파라미터 및 레이어 수 요약 출력
+    모델 파라미터 및 레이어 수 요약 출력 (모든 분류 모델 공통)
     """
     n_params = sum(p.numel() for p in model.parameters())
     print(f"모델 파라미터 수: {n_params:,}")

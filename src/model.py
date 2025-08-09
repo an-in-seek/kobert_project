@@ -10,9 +10,8 @@ from transformers import BertModel
 
 def get_kobert_model_and_tokenizer():
     """
-    로컬에 저장된 kobert-base-v1-local 폴더에서 KoBERT 모델과 토크나이저를 로드
+    로컬 디렉토리에서 KoBERT 모델과 토크나이저를 로드
     """
-    # model.py가 src/에 있다고 가정
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     model_dir = os.path.join(base_dir, 'kobert-base-v1-local')
     tokenizer = KoBERTTokenizer.from_pretrained(model_dir)
@@ -21,7 +20,13 @@ def get_kobert_model_and_tokenizer():
 
 
 class BERTClassifier(nn.Module):
-    def __init__(self, bert, hidden_size=768, num_classes=8, dr_rate=None):
+    def __init__(self, bert, hidden_size=768, num_classes=2, dr_rate=None):
+        """
+        bert: 사전학습 KoBERT 모델
+        hidden_size: KoBERT 출력 차원(기본 768)
+        num_classes: 분류 클래스 수 (task별로 다름)
+        dr_rate: Dropout 확률 (None이면 Dropout 미사용)
+        """
         super().__init__()
         self.bert = bert
         self.classifier = nn.Linear(hidden_size, num_classes)
@@ -33,6 +38,6 @@ class BERTClassifier(nn.Module):
             attention_mask=attention_mask,
             token_type_ids=token_type_ids,
         )
-        pooled = outputs.pooler_output  # transformers >=4.8.2
+        pooled = outputs.pooler_output  # [batch, hidden]
         out = self.dropout(pooled)
         return self.classifier(out)
