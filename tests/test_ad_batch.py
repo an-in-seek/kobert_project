@@ -27,6 +27,7 @@ CASES: List[Tuple[str, str]] = [
 
     # 정상
     ("반가워요", "정상"),
+    ("기분이 좋더라구요~", "정상"),
     ("오늘 날씨 참 좋네요.", "정상"),
     ("아이잘때 달아놓는 캠을 통해 우연히 시어머니가 맨발로 침대위에서 발로 앉으시고 발을 쫙 핀상태로 누으시는 장면을 보게됬고 그걸 남편한테 자연스럽게 말을 했어요.. ", "정상"),
     ("남편도 그건 잘못된거라 했지만 아이를 봐주시러 와주시는 시어머니에게 않좋게 말씀드리고 싶지는 않은데 어떡하면 심기를 불편하게 해드리지 않고 자연스러운 방법이 없을까요? ", "정상"),
@@ -46,11 +47,22 @@ CASES: List[Tuple[str, str]] = [
 
 IDS = [f"{i:02d}_{'ad' if lab == '광고' else 'normal'}" for i, (_, lab) in enumerate(CASES)]
 
+# 스모크: 고정 선택
+SMOKE_IDX = [
+    # --- 광고 ---
+    0,  # "무료 증정" - 무료
+    # --- 정상 ---
+    16,  # "반가워요" - 최단/일상 인사
+]
+SMOKE_CASES = [CASES[i] for i in SMOKE_IDX]
+SMOKE_IDS = [IDS[i] for i in SMOKE_IDX]
 
-@pytest.mark.parametrize("text,expected", CASES, ids=IDS)
+
+@pytest.mark.parametrize("text,expected", SMOKE_CASES, ids=SMOKE_IDS)
 def test_ad_batch_predictions(model_and_tokenizer, max_len, device, text, expected):
     """
     배치 경로를 사용해 단건도 예측해 동일 코드 경로를 검증.
+    스모크 케이스만 사용해 실패 중복 출력을 방지.
     """
     model, tokenizer = model_and_tokenizer
     preds = predict_batch(
@@ -71,6 +83,7 @@ def test_ad_batch_predictions_all(model_and_tokenizer, max_len, device):
     """
     모든 케이스를 한 번에 배치 예측으로 검증하고,
     틀린 항목이 있으면 표로 상세 출력.
+    (여기서만 상세 실패 표를 출력해 중복 실패 로그를 방지)
     """
     model, tokenizer = model_and_tokenizer
     sentences = [t for t, _ in CASES]
